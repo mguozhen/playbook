@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>50 台保号矩阵 · Playbook v2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{
+  --bg:#08060f;
+  --bg-2:#13102a;
+  --surface:#1c1735;
+  --surface-2:#26204a;
+  --line:#2f2854;
+  --purple:#7c3aed;
+  --purple-2:#a78bfa;
+  --gold:#f59e0b;
+  --gold-2:#fde68a;
+  --green:#34d399;
+  --red:#f87171;
+  --orange:#fb923c;
+  --text:#e5e7eb;
+  --text-dim:#9ca3af;
+  --text-dimer:#6b7280;
+  --card-bg:linear-gradient(155deg,#1c1735 0%,#241c46 100%);
+  --card-glow:0 0 0 1px rgba(167,139,250,.25),0 14px 50px -8px rgba(124,58,237,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Noto Sans SC',sans-serif;line-height:1.65;font-size:15px}
+body{background:
+  radial-gradient(1400px 700px at 85% -10%,rgba(124,58,237,.22),transparent 60%),
+  radial-gradient(900px 500px at 5% 110%,rgba(245,158,11,.12),transparent 60%),
+  radial-gradient(800px 400px at 50% 50%,rgba(248,113,113,.08),transparent 70%),
+  var(--bg);min-height:100vh}
+.container{max-width:1160px;margin:0 auto;padding:48px 28px 96px}
+
+.tag{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:600;border:1px solid currentColor}
+.tag.scale{color:var(--gold);background:rgba(245,158,11,.1)}
+.tag.purpose{color:var(--purple-2);background:rgba(167,139,250,.1)}
+.tag.warn{color:var(--orange);background:rgba(251,146,60,.1)}
+
+.headline{font-size:32px;font-weight:700;margin:0 0 8px;letter-spacing:-.5px;background:linear-gradient(120deg,#fff 0%,#a78bfa 70%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subline{color:var(--text-dim);margin:0 0 20px}
+
+#draw-stage{min-height:80vh;display:flex;flex-direction:column;align-items:center;padding-top:6vh}
+#draw-stage .intro{text-align:center;max-width:780px}
+#draw-stage h1{font-size:44px;font-weight:800;letter-spacing:-1px;margin:0 0 14px;background:linear-gradient(120deg,#fff,#a78bfa 50%,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#draw-stage .intro p{color:var(--text-dim);font-size:16px;margin:0 0 6px}
+#draw-stage .intro .tags{margin:14px 0 8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#draw-stage .intro .meta{color:var(--text-dimer);font-size:12.5px;margin-top:14px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin:48px 0 22px;width:100%;max-width:1300px}
+@media (max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:680px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.cards{grid-template-columns:1fr}}
+
+.card{position:relative;perspective:1400px;height:360px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .8s cubic-bezier(.22,1,.36,1);transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.face.back{background:
+  radial-gradient(120% 80% at 50% 0%,rgba(167,139,250,.4),transparent 60%),
+  linear-gradient(160deg,#1c1735,#0a0716);
+  border:1px solid rgba(167,139,250,.3);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--card-glow)}
+.face.back::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(167,139,250,.3);border-radius:14px}
+.face.back .glyph{font-size:64px;background:linear-gradient(120deg,#a78bfa,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;filter:drop-shadow(0 4px 16px rgba(167,139,250,.4))}
+.face.back .label{position:absolute;bottom:18px;color:var(--text-dimer);font-size:11px;letter-spacing:2px;text-transform:uppercase;text-align:center;padding:0 10px}
+.face.front{background:var(--card-bg);border:1px solid rgba(167,139,250,.25);transform:rotateY(180deg);padding:18px;box-shadow:var(--card-glow)}
+.face.front .slot{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600}
+.face.front .emoji{font-size:36px;margin:12px 0 4px;line-height:1}
+.face.front .title{font-size:16.5px;font-weight:700;margin:0 0 8px;letter-spacing:-.2px;line-height:1.3}
+.face.front .desc{font-size:12px;color:var(--text-dim);line-height:1.55;flex:1}
+.face.front .cost{font-size:11px;color:var(--gold-2);margin-top:6px;font-variant-numeric:tabular-nums}
+.face.front .reroll{margin-top:10px;text-align:center;font-size:11px;color:var(--purple-2);letter-spacing:.5px;padding:7px 0;border-top:1px dashed rgba(167,139,250,.2);transition:color .2s}
+.face.front .reroll:hover{color:var(--gold-2)}
+
+.actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+button.btn{appearance:none;border:1px solid rgba(167,139,250,.4);background:linear-gradient(120deg,#7c3aed,#5b21b6);color:#fff;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px -6px rgba(124,58,237,.6)}
+button.btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px -6px rgba(124,58,237,.8)}
+button.btn.ghost{background:transparent;color:var(--purple-2);box-shadow:none}
+button.btn.ghost:hover{background:rgba(124,58,237,.1)}
+button.btn.gold{background:linear-gradient(120deg,#f59e0b,#d97706);border-color:rgba(245,158,11,.5);box-shadow:0 8px 24px -6px rgba(245,158,11,.5)}
+button.btn.gold:hover{box-shadow:0 12px 28px -6px rgba(245,158,11,.7)}
+
+#playbook{display:none}
+#playbook.show{display:block;animation:fade .6s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.hand{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 12px}
+@media (max-width:780px){.hand{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:460px){.hand{grid-template-columns:1fr}}
+.hand-card{padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.hand-card .slot{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px}
+.hand-card .title{font-size:14px;font-weight:600;line-height:1.3}
+.hand-card .desc{font-size:12px;color:var(--text-dim);margin-top:4px}
+.hand-card .cost{font-size:11px;color:var(--gold-2);margin-top:4px;font-variant-numeric:tabular-nums}
+
+section.block{background:linear-gradient(180deg,var(--surface),rgba(28,23,53,.4));border:1px solid var(--line);border-radius:16px;padding:28px;margin:18px 0}
+section.block h2{margin:0 0 14px;font-size:22px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+section.block h2 .ic{display:inline-flex;width:32px;height:32px;border-radius:9px;background:rgba(167,139,250,.15);align-items:center;justify-content:center;font-size:16px}
+section.block h3{font-size:16px;font-weight:600;color:var(--purple-2);margin:20px 0 10px}
+section.block p,section.block li{color:var(--text);font-size:14.5px}
+section.block ul{padding-left:20px;margin:8px 0}
+section.block li{margin:6px 0}
+
+table.budget{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px}
+table.budget th,table.budget td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+table.budget th{color:var(--gold);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+table.budget td.num{text-align:right;color:var(--gold-2);font-variant-numeric:tabular-nums;font-weight:600}
+table.budget tr.total td{border-top:2px solid var(--gold);font-weight:700;font-size:14.5px}
+table.budget tr.subtotal td{color:var(--text-dim);font-style:italic}
+
+.arch{background:#06040d;border:1px solid var(--line);border-radius:12px;padding:18px;margin:10px 0;font-family:ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;font-size:12.5px;color:var(--purple-2);overflow:auto;line-height:1.7;white-space:pre}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+@media (max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.grid3{grid-template-columns:1fr}}
+.tile{background:rgba(15,10,34,.55);border:1px solid var(--line);border-radius:12px;padding:16px}
+.tile h4{margin:0 0 6px;font-size:14px;color:var(--purple-2);font-weight:600}
+.tile p{margin:0;font-size:13px;color:var(--text-dim)}
+
+.dimension{display:grid;grid-template-columns:30px 1fr 1.6fr;gap:8px 14px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.dimension:last-child{border:0}
+.dimension .num{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.dimension .what{font-weight:600;color:var(--purple-2)}
+.dimension .how{color:var(--text-dim);font-size:13px}
+
+.timeline{display:grid;grid-template-columns:140px 1fr;gap:14px 22px;margin-top:10px}
+.timeline .when{color:var(--gold);font-weight:600;font-size:13px;letter-spacing:.5px;padding-top:2px}
+.timeline .what{font-size:14px}
+.timeline .what ul{padding-left:18px;margin:4px 0}
+
+.risk{display:grid;grid-template-columns:1.2fr 80px 1.5fr;gap:10px 14px;font-size:13.5px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.risk:last-child{border:0}
+.risk .level{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.5px;text-align:center;height:fit-content}
+.risk .h{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.risk .m{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.risk .l{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+
+.dont{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.dont .it{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:12px;font-size:13px}
+.dont .it::before{content:"✗ ";color:var(--red);font-weight:700}
+
+.footer{margin-top:48px;text-align:center;color:var(--text-dimer);font-size:12px}
+
+.toolbar{position:sticky;top:12px;z-index:10;display:flex;gap:8px;justify-content:flex-end;margin-bottom:-20px}
+.toolbar button{font-size:12px;padding:8px 12px;background:rgba(28,23,53,.85);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--text-dim);border-radius:8px;cursor:pointer}
+.toolbar button:hover{color:var(--gold-2);border-color:var(--gold)}
+
+@media print{
+  body{background:#fff;color:#111}
+  #draw-stage,.toolbar,.face.back{display:none!important}
+  #playbook{display:block!important}
+  section.block{break-inside:avoid;page-break-inside:avoid}
+  .face.front{box-shadow:none;border:1px solid #ddd}
+}
+</style>
+</head>
+<body>
+
+<div id="draw-stage">
+  <div class="intro">
+    <h1>50 台保号矩阵 · v2.1</h1>
+    <p>一机三号 · TT + IG + Amazon · 30 天极限版 · 1 人自营</p>
+    <div class="tags">
+      <span class="tag scale">50 台</span>
+      <span class="tag purpose">方案 B · 30 台激活 + 20 台留后</span>
+      <span class="tag warn">$30.5k</span>
+    </div>
+    <p class="meta">这是个工业级保号方案。6 张牌决定你的开局：设备组合 / 机房布局 / IP 策略 / 一机三号节奏 / Amazon 地址策略 / 保号期变现。单卡可重抽，锁定后进入完整 Playbook。</p>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="actions">
+    <button class="btn" id="drawBtn">抽 6 张牌</button>
+    <button class="btn ghost" id="redrawAll" hidden>全部重抽</button>
+    <button class="btn gold" id="lockIn" hidden>锁定出装 → 进入 Playbook</button>
+  </div>
+</div>
+
+<div class="container">
+<div id="playbook">
+
+<div class="toolbar">
+  <button onclick="window.print()">导出 PDF</button>
+  <button onclick="location.reload()">重新抽卡</button>
+</div>
+
+<h1 class="headline">50 台保号矩阵 · Playbook v2.1 · 30 天极限版</h1>
+<p class="subline">方案 B（30 台激活 + 20 台留后）· 1 人自营 · 已有 50 个静态商业 IP · 硅谷本地身份</p>
+
+<section class="block">
+  <h2><span class="ic">🎴</span> 你的出装</h2>
+  <div class="hand" id="hand"></div>
+  <p style="color:var(--text-dim);font-size:13px;margin:8px 0 0">这套出装是 50 台保号矩阵的基础配置。下面 Playbook 的 SOP / 预算 / 风险全部基于这套出装写。单张牌不满意可以回上一步重抽。</p>
+</section>
+
+<section class="block">
+  <h2><span class="ic">⚠️</span> 为什么这套和 MVP 完全不同</h2>
+  <div class="grid3">
+    <div class="tile"><h4>核心矛盾</h4><p>Amazon 关联检测 13 个维度叠加 TT/IG 风控 = 单台失误拖累整组。MVP 4 台烧坏没关系，50 台连环烧 = 灾难。</p></div>
+    <div class="tile"><h4>目标转换</h4><p>不再是 90 天找信号，是 6-12 个月养出 50 个可长期持有的数字身份。账号本身就是资产。</p></div>
+    <div class="tile"><h4>预算量级</h4><p>$30k-$50k 起步。设备 $10k 只是入门，地址 / SIM / 主体 / IP 加起来才是大头。</p></div>
+    <div class="tile"><h4>运营节奏</h4><p>每号每周登 1-3 次，每次 5-15 分钟。50 个号不能同时活跃，要分批轮转。</p></div>
+    <div class="tile"><h4>主体结构</h4><p>需要 2-3 个 LLC 隔离风险。1 个 LLC 挂 50 个号 = Amazon 一关全关。</p></div>
+    <div class="tile"><h4>变现≠主目标</h4><p>保号期可零变现。Amazon 老买家号 5 年后单价 ¥2k-5k，提前急吼吼变现会摧毁资产。</p></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🏗️</span> 总体架构</h2>
+  <div class="arch">┌─────────────────────────────────────────────────────────┐
+│   真机阵列 50 台 (一机三号: TT + IG + Amazon)            │
+│   ├── 设备指纹独立 · 出厂状态 · 不 root                  │
+│   ├── 每台 1 张独立 SIM (蜂窝数据 = 干净美国 IP)         │
+│   ├── 每台 1 个独立 Apple ID / Google 账号               │
+│   ├── 每台 1 个独立邮箱 (Gmail / iCloud Hide My Email)   │
+│   ├── 每台 1 个独立美国地址 (虚拟邮箱服务)               │
+│   └── 每台 1 张独立信用卡 (Privacy.com 虚拟卡)           │
+└─────────────────────────────────────────────────────────┘
+                            ↓
+              ┌──────────────────────────────┐
+              │  主控 / 后台 / 主体结构       │
+              │  - 2-3 个 Wyoming LLC         │
+              │  - 每个 LLC 挂 15-25 个号     │
+              │  - 多个 Mercury 商业账户       │
+              │  - 1 台主控 PC + 多 USB Hub  │
+              │  - Notion 调度表 + KPI 追踪   │
+              │  - 1Password 凭证管理         │
+              └──────────────────────────────┘
+                            ↑
+┌─────────────────────────────────────────────────────────┐
+│   Reddit 浏览器矩阵 (独立，与真机零关联)                  │
+│   ├── 50 个 AdsPower / Dolphin Anty profile             │
+│   ├── 50 个独立住宅代理 sticky IP                       │
+│   └── 不与真机矩阵共享任何身份 / 邮箱 / 信用卡           │
+└─────────────────────────────────────────────────────────┘</div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🛡️</span> Amazon 关联检测 13 维度防御</h2>
+  <p>Amazon 是三平台中风控最严的。13 个关联维度任一被关联，可能触发"挂联"封禁所有相关账号。每台手机必须独立守住这 13 维。</p>
+  <div style="margin-top:12px">
+    <div class="dimension"><div class="num">01</div><div class="what">设备指纹</div><div class="how">IMEI / Serial / Advertising ID / Hardware ID 每台独立。出厂状态使用，<b>不刷机不 root</b>。</div></div>
+    <div class="dimension"><div class="num">02</div><div class="what">出口 IP</div><div class="how">每台独立 SIM 蜂窝数据，<b>不连任何 WiFi</b>。Tello / Mint Mobile / US Mobile 真实运营商 IP。</div></div>
+    <div class="dimension"><div class="num">03</div><div class="what">付款方式</div><div class="how">每号一张 Privacy.com 虚拟卡，绑不同 Plaid 来源。<b>不要复用同一信用卡。</b></div></div>
+    <div class="dimension"><div class="num">04</div><div class="what">收货地址</div><div class="how">10-20 个虚拟邮箱地址（Anytime Mailbox / US Global Mail）。每地址挂 3-5 个账号上限。</div></div>
+    <div class="dimension"><div class="num">05</div><div class="what">浏览器 Cookie</div><div class="how">每号独立 Safari/Chrome profile，<b>清干净 LocalStorage / IndexedDB</b>。每月手动清一次。</div></div>
+    <div class="dimension"><div class="num">06</div><div class="what">邮箱关联</div><div class="how">不同 Gmail 域名、不同 recovery email、<b>不交叉互为 backup</b>。50 个号 = 50 个 Gmail。</div></div>
+    <div class="dimension"><div class="num">07</div><div class="what">手机号</div><div class="how">每号独立 Tello SIM。<b>不用 Google Voice / Twilio 虚拟号</b>（Amazon 拒）。</div></div>
+    <div class="dimension"><div class="num">08</div><div class="what">行为模式</div><div class="how">购物时段错开、品类风格独立。50 个号都买同款 = 立刻挂联。</div></div>
+    <div class="dimension"><div class="num">09</div><div class="what">退货历史</div><div class="how">退货率 < 5%。同一邮箱多次申诉触发 review。</div></div>
+    <div class="dimension"><div class="num">10</div><div class="what">Wi-Fi BSSID</div><div class="how">即使你"只用蜂窝"，App 仍可能扫到周围 WiFi。<b>家里别开过多设备同 Wi-Fi</b>。</div></div>
+    <div class="dimension"><div class="num">11</div><div class="what">设备型号</div><div class="how">50 台同款 iPhone 11 = 风控扫到"同批购入"概率。建议<b>混搭 2-3 个型号</b>。</div></div>
+    <div class="dimension"><div class="num">12</div><div class="what">登录时序</div><div class="how">50 个号 24 小时内全部首次登 Amazon = 必挂联。分 30 天逐批激活。</div></div>
+    <div class="dimension"><div class="num">13</div><div class="what">主体（LLC）</div><div class="how">2-3 个 LLC 分组挂号。1 个 LLC 挂 50 号 = Amazon 关联秒挂全组。</div></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">💰</span> 预算明细（中位 $40k）</h2>
+  <table class="budget">
+    <thead><tr><th>项</th><th>说明</th><th class="num">USD</th></tr></thead>
+    <tbody>
+      <tr><td>50 台二手手机</td><td>iPhone 11 × 35 + Pixel 6 × 15 混搭 · Swappa A 级</td><td class="num">$8,250</td></tr>
+      <tr><td>5 × 工业 USB Hub 10 口</td><td>带独立供电 · UPS 备份</td><td class="num">$500</td></tr>
+      <tr><td>机架 + 散热风扇 + 充电线</td><td>家庭书房改造</td><td class="num">$800</td></tr>
+      <tr><td>1 台主控 Mac mini M4</td><td>16GB / 512GB · 24/7 运行</td><td class="num">$700</td></tr>
+      <tr><td>50 × Tello SIM（12 个月）</td><td>$5/月 × 50 × 12 = $3000，年付折扣后</td><td class="num">$2,400</td></tr>
+      <tr><td>15 × 虚拟邮箱地址（12 个月）</td><td>Anytime Mailbox 混合 USPS 地址 · $25/月/个</td><td class="num">$4,500</td></tr>
+      <tr><td>Privacy.com Pro</td><td>$10/月 · 无限虚拟卡</td><td class="num">$120</td></tr>
+      <tr><td>2-3 × Wyoming LLC + 注册代理</td><td>$250 × 3 = $750（首年）</td><td class="num">$750</td></tr>
+      <tr><td>AdsPower Pro 50 profile（12 个月）</td><td>Reddit 矩阵用</td><td class="num">$1,200</td></tr>
+      <tr><td>住宅代理（已替换）</td><td><b>用你已有的 50 个静态商业 IP · 省 $3,600</b></td><td class="num">$0</td></tr>
+      <tr><td>Claude API + 内容工具（12 个月）</td><td>文案 / 评论 draft</td><td class="num">$1,800</td></tr>
+      <tr><td>50 × Apple Developer 账号</td><td><b>不做</b>（保号阶段不需要）</td><td class="num">$0</td></tr>
+      <tr><td>50 × Gmail 注册成本</td><td>纯人工，时间 = 钱</td><td class="num">$0</td></tr>
+      <tr><td>购物启动金（Amazon 养号小额订单）</td><td>每号 $20-50 启动单 · 50 × $30</td><td class="num">$1,500</td></tr>
+      <tr class="subtotal"><td colspan="2">必选合计</td><td class="num">$22,520</td></tr>
+      <tr><td>Buffer（封号补号 / 设备坏 / 意外）</td><td>20-30% 必备 · 静态 IP 省下的钱可挪过来</td><td class="num">~$8,000</td></tr>
+      <tr><td>运营人力</td><td>你 1 人自营 · 不雇人</td><td class="num">$0</td></tr>
+      <tr class="total"><td colspan="2">首年总投入（1 人自营）</td><td class="num">$30,520</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🔥</span> 30 天极限版 SOP · 方案 B</h2>
+  <p>目标：Day 30 交付 <b>30 台激活 + 10 台跑通一机三号链路</b>，剩余 20 台 Day 31-45 补齐。物理瓶颈 + Apple ID 风控 + 人手 1 人决定了这是最优解。</p>
+  <div class="timeline">
+    <div class="when">Day 1（今天）</div>
+    <div class="what">
+      <ul>
+        <li>上午：注册 3 个 Wyoming LLC（Northwest 加急 24h，$250 × 3）+ 3 个 EIN（IRS 在线，10 分钟）+ 3 个 Mercury 商业账户（线上提交）</li>
+        <li>中午：下单 50 张 Tello SIM 分 3 批（最长 lead time，今天不下赶不上）</li>
+        <li>下午：下单 50 台二手手机 · 5 个 Swappa 卖家分散 · 25 iPhone 11 + 15 iPhone SE 3rd + 10 Pixel 6</li>
+        <li>下午：注册 15 个 Anytime Mailbox 地址 · 立刻找 UPS Store 公证 USPS Form 1583</li>
+        <li>下午：开 Privacy.com Pro + AdsPower Pro 50 profile 年付</li>
+        <li>晚上：跑 IP 信誉自检脚本检查 50 个静态商业 IP · 不干净的 IP 立刻联系供应商换</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 2-3</div>
+    <div class="what">
+      <ul>
+        <li>Mercury 审核中 · 联系 UPS Store 完成 1583 公证 · 邮寄给 Anytime Mailbox</li>
+        <li>启动 Reddit 矩阵：AdsPower 配 50 profile，每个 profile 绑 1 个静态商业 IP（你已有），创建 50 个 Gmail（独立 recovery 邮箱）</li>
+        <li>Reddit 注册 50 个号（在 50 个独立 profile + 独立 IP 下）</li>
+        <li>Reddit 静默期立刻开始（注册后只浏览不互动）</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 4-10 · 物理基建</div>
+    <div class="what">
+      <ul>
+        <li>SIM 卡陆续到货 · 激活每张并贴标签</li>
+        <li>iPhone 陆续到货 · Mac mini 主控搭建 · USB Hub 接线</li>
+        <li>scrcpy 测 10 台 Pixel · QuickTime 多窗口测 4 台 iPhone</li>
+        <li>建 Notion 数据库：50 号 KPI 表 · 5 天轮转表 · Amazon 订单日志</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 11-25 · 账号激活</div>
+    <div class="what">
+      <ul>
+        <li><b>硬限制：每天 4-5 台激活</b>（不能突破，Apple ID 风控）</li>
+        <li>每台流程：开机 → 新 Apple ID（Tello 收码）→ 装 TT/IG（Play Store/App Store 美区）→ 纯浏览 24h → 进入静默期</li>
+        <li>15 天累计：60-75 台次（含返工），<b>30 台激活完成</b></li>
+        <li>每激活 1 台立刻更新 Notion 表（IMEI / Apple ID / SIM 号 / 分配 LLC / 静态地址）</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 22-28 · 一机三号链路测试</div>
+    <div class="what">
+      <ul>
+        <li>选最早激活的 <b>10 台</b>（已静默 15+ 天）做 Amazon 接入</li>
+        <li>每号一个虚拟邮箱地址（10 地址挂 10 号，1:1 不复用）</li>
+        <li>每号一张 Privacy.com 虚拟卡（信用卡来源分散：3 个 LLC 卡分配）</li>
+        <li>每号下一笔 $20-50 小订单（书 / 日用品 / 不同品类）</li>
+        <li>等收货成功 → 形成 1 个 verified purchase</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 29-30 · Day 30 交付状态</div>
+    <div class="what">
+      <ul>
+        <li>30 台 iPhone/Pixel 激活 · TT/IG 注册完成 · 静默期完成</li>
+        <li>10 个 Amazon 号有 verified purchase</li>
+        <li>50 个 Reddit 号注册完成 · 静默期完成（部分已开始 comment）</li>
+        <li>3 个 LLC 全部到位 + Mercury 账户激活</li>
+        <li>Day 30 复盘：哪些环节卡壳？补 20 台是否需要调整？</li>
+      </ul>
+    </div>
+
+    <div class="when">Day 31-45 · 补齐</div>
+    <div class="what">
+      <ul>
+        <li>继续每天 4-5 台激活，完成剩余 20 台</li>
+        <li>第 1 批 30 台继续保号节奏（5 天循环 · 每天 6 台活跃）</li>
+        <li>逐步把所有 50 个号接入 Amazon</li>
+        <li>Day 45 完成 50 台全功能上线</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🌐</span> 50 个静态商业 IP 的应用方案</h2>
+  <p>你已有的 50 个静态商业 IP（数据中心 IP）<b>不能用于 TT/IG/Amazon</b>，但完美匹配 Reddit 矩阵 + 辅助任务。</p>
+  <div class="grid2">
+    <div class="tile">
+      <h4>✅ 适合用</h4>
+      <p><b>Reddit 矩阵</b>：50 profile × 50 IP，1:1 绑定。Reddit 对数据中心 IP 容忍度高。</p>
+      <p style="margin-top:8px"><b>AdsPower 启动</b>：每个 profile 默认走分配的静态 IP。</p>
+      <p style="margin-top:8px"><b>邮箱注册</b>：Gmail / ProtonMail / iCloud Mail 注册可走（频繁要手机验证但能过）。</p>
+      <p style="margin-top:8px"><b>Playwright 监控</b>：监控 subreddit / TT trending / Amazon 价格（不登录）。</p>
+    </div>
+    <div class="tile" style="border-color:rgba(248,113,113,.3)">
+      <h4 style="color:var(--red)">❌ 不能用</h4>
+      <p><b>Instagram</b>：注册阶段直接拒（IG 对 IDC IP 零容忍）。</p>
+      <p style="margin-top:8px"><b>Amazon</b>：注册即被标 fraud · 号秒挂。</p>
+      <p style="margin-top:8px"><b>TikTok 国际版</b>：限流 · 新号信任分极低 · 不要碰。</p>
+      <p style="margin-top:8px"><b>Apple ID 注册</b>：Apple 对 IDC IP 风控严，多次失败会锁。</p>
+    </div>
+  </div>
+  <h3>关键纪律</h3>
+  <ul>
+    <li>50 个静态 IP <b>不能与任何 Amazon 真机矩阵的设备共享</b>（哪怕一次都不行）</li>
+    <li>真机矩阵的 iPhone <b>全程仅蜂窝数据</b>（Tello SIM），不连任何 WiFi · 也不能通过 Mac 主控的网络共享出口</li>
+    <li>Mac 主控自身的 WiFi 网络 <b>不能跑 AdsPower</b>（避免静态 IP 和真机 BSSID 关联）</li>
+    <li>静态 IP 信誉必须先跑 <code>~/matrix-mvp/scripts/check_ip_reputation.sh</code> 检测黑名单 · 不干净的换</li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span class="ic">⚙️</span> 一机三号 · 日常 SOP</h2>
+  <h3>核心原则：50 个号不能同时活跃</h3>
+  <p>同时 50 个号活跃 = 同一物理空间 50 个用户行为聚类 = 立即触发关联。必须分批轮转。</p>
+
+  <h3>推荐节奏：5 天循环 · 每天 10 台活跃</h3>
+  <div class="grid2">
+    <div class="tile"><h4>Day 1</h4><p>#01-#10 活跃 · 各自 TT/IG 浏览 + 偶尔 Amazon</p></div>
+    <div class="tile"><h4>Day 2</h4><p>#11-#20 活跃</p></div>
+    <div class="tile"><h4>Day 3</h4><p>#21-#30 活跃</p></div>
+    <div class="tile"><h4>Day 4</h4><p>#31-#40 活跃</p></div>
+    <div class="tile"><h4>Day 5</h4><p>#41-#50 活跃</p></div>
+    <div class="tile"><h4>每月 1 次</h4><p>50 台全部"轻摸"一次（开机检查更新，不操作账号）</p></div>
+  </div>
+
+  <h3>每台单日操作 SOP（15-20 分钟）</h3>
+  <ul>
+    <li><b>TT</b>：刷 10-15 分钟 For You · 点 2-3 个赞 · 偶尔评论一条 · 每周发 1-2 条原创（视号定位）</li>
+    <li><b>IG</b>：刷 Reels 5 分钟 · 看 1-2 个 story · 偶尔点赞 · 每 2-3 周发 1 张图</li>
+    <li><b>Amazon</b>：每月浏览 2-3 次 · 每 2-3 月下一笔小单（$15-50）· 留 verified purchase 痕迹</li>
+  </ul>
+
+  <h3>禁忌</h3>
+  <ul>
+    <li>同一时段不要切换 5+ 台手机（让户主活动看起来"是一个人"）</li>
+    <li>不要在同一台手机上让 TT/IG/Amazon 跳来跳去（每次只用一个 App，留间隔 5-10 分钟）</li>
+    <li>Amazon 不要批量下同款商品（哪怕每号都买相同产品，分散日期）</li>
+    <li>不要给同样的产品留好评（明显的刷单痕迹）</li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🛠️</span> 工具栈</h2>
+  <h3>真机端</h3>
+  <div class="grid3">
+    <div class="tile"><h4>scrcpy（Android 部分）</h4><p>brew 已装。15 台 Pixel 用它，Mac 端完整键鼠控制</p></div>
+    <div class="tile"><h4>QuickTime（iPhone 部分）</h4><p>macOS 自带 · 多窗口投屏 · 仅看不控</p></div>
+    <div class="tile"><h4>Privacy.com</h4><p>虚拟信用卡批量生成 · 每号一张</p></div>
+    <div class="tile"><h4>Anytime Mailbox</h4><p>虚拟邮寄地址 · 多州分布</p></div>
+    <div class="tile"><h4>Tello SIM</h4><p>$5/月真实 T-Mobile 网络</p></div>
+    <div class="tile"><h4>1Password</h4><p>50 套凭证集中管理（必须）</p></div>
+  </div>
+
+  <h3>Reddit 端（独立矩阵）</h3>
+  <div class="grid3">
+    <div class="tile"><h4>AdsPower Pro</h4><p>50 profile · 指纹隔离</p></div>
+    <div class="tile"><h4>922 S5</h4><p>50 sticky 美国住宅 IP</p></div>
+    <div class="tile"><h4>Playwright</h4><p>监控目标 sub 热度 · 不发帖</p></div>
+  </div>
+
+  <h3>后台</h3>
+  <div class="grid3">
+    <div class="tile"><h4>Notion</h4><p>50 号 KPI 表 + 5 天轮转表 + Amazon 订单日志</p></div>
+    <div class="tile"><h4>Mercury × 2-3</h4><p>每 LLC 一个商业账户</p></div>
+    <div class="tile"><h4>Claude API</h4><p>批量内容生成 · 不批量发布</p></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">⚠️</span> 风险与对冲</h2>
+  <div style="margin-top:10px">
+    <div class="risk"><div>Amazon 13 维度有 1 维失误 → 挂联整组 (15+ 号)</div><div class="level h">最高</div><div>3 个 LLC 分组隔离 · 每地址挂号上限 4 · 错时激活</div></div>
+    <div class="risk"><div>50 台手机批量 Apple ID 注册被 Apple 风控</div><div class="level h">高</div><div>每天最多 3 台激活 · 分 3-4 周分批 · 不同 Wi-Fi 注册</div></div>
+    <div class="risk"><div>50 张 Tello SIM 同源 IP 段被识别为"农场"</div><div class="level m">中</div><div>分 3 批购买 · 寄不同地址 · 激活间隔 24h+</div></div>
+    <div class="risk"><div>虚拟邮箱地址被 Amazon 列入黑名单</div><div class="level m">中</div><div>混合 3-5 家不同服务 · 不只用 Anytime Mailbox</div></div>
+    <div class="risk"><div>Privacy.com 同源 Plaid 关联</div><div class="level m">中</div><div>多个 Privacy.com 账户 + 不同 LLC 的银行卡来源</div></div>
+    <div class="risk"><div>50 台同型号手机指纹聚类</div><div class="level m">中</div><div>混搭 35 iPhone + 15 Pixel · 不同购买批次</div></div>
+    <div class="risk"><div>家里 Wi-Fi BSSID 被多号 App 扫到</div><div class="level m">中</div><div>关闭 Mac 主控的 Wi-Fi 共享 · 手机全程仅蜂窝数据</div></div>
+    <div class="risk"><div>主控 Mac 故障导致 50 台失联</div><div class="level l">低</div><div>每月一次 Time Machine 备份 · Mac mini 残值高易替换</div></div>
+    <div class="risk"><div>电费 / 散热 / 火灾</div><div class="level l">低</div><div>带 UPS · 烟雾报警器 · 工业级散热风扇</div></div>
+    <div class="risk"><div>邻居 / 房东发现"小机房"投诉</div><div class="level l">低</div><div>分散在书房 · 加门关上 · 不外露</div></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🚫</span> 不做的事</h2>
+  <div class="dont">
+    <div class="it">不刷机 · 不 root · 不装 Magisk / Frida（保号期出厂状态最安全）</div>
+    <div class="it">不批量同时激活 50 台（每天上限 3-5 台）</div>
+    <div class="it">不用接码平台 / Google Voice 注册 Amazon</div>
+    <div class="it">不在同一 LLC 下挂超过 25 个 Amazon 号</div>
+    <div class="it">不让 50 个号同时活跃</div>
+    <div class="it">不在保号期做 Amazon Vine / 测评 / 刷单（前 6 个月别碰）</div>
+    <div class="it">不复用 Apple ID / Gmail / 信用卡</div>
+    <div class="it">不连 Wi-Fi（除主控外，所有手机仅蜂窝数据）</div>
+    <div class="it">不做 TT Shop 入驻（保号期账号属性是消费者，不是卖家）</div>
+    <div class="it">不让 50 台同时下单同款商品</div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🎯</span> 90 天 / 6 个月 / 12 个月 KPI</h2>
+  <h3>Day 90</h3>
+  <ul>
+    <li>50 台全部激活 · 封号率 < 10%（5 台以内可接受）</li>
+    <li>每号都有 1+ Amazon verified purchase 历史</li>
+    <li>每号 TT 粉丝 > 50 · IG 粉丝 > 30</li>
+    <li>50 号 = 50 个独立的"硅谷数字身份" 雏形已建立</li>
+  </ul>
+  <h3>Day 180</h3>
+  <ul>
+    <li>50 台存活率 > 80%</li>
+    <li>每号 Amazon 订单 3+ · 累计消费 $100+</li>
+    <li>每号 TT 粉丝 > 200 · IG 粉丝 > 100</li>
+    <li>10+ 个号开始有 organic 互动（评论 / 私信）</li>
+  </ul>
+  <h3>Day 365</h3>
+  <ul>
+    <li>50 台存活率 > 70%（35 号活号资产）</li>
+    <li>每号 Amazon 1 年消费记录 · Trust score 进入"老用户"区间</li>
+    <li>开始可选变现：Amazon Vine / 接 UGC / 卖号 / 自营产品测评</li>
+    <li>头部 5-10 号开始有真实变现现金流</li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🚀</span> 12 个月后变现选项</h2>
+  <div class="grid3">
+    <div class="tile"><h4>Amazon Vine</h4><p>新手段：邀请进 Vine 计划，免费产品换 review · 单号年价值 $1k-3k</p></div>
+    <div class="tile"><h4>自营 FBA 测评闭环</h4><p>自家产品 + 50 个老号留 verified review · 排名飞速提升</p></div>
+    <div class="tile"><h4>TT/IG 接 UGC</h4><p>头部号粉丝 1k+ 接小品牌广告 · 单条 $50-300</p></div>
+    <div class="tile"><h4>账号租赁</h4><p>给 Amazon 测评团队租号 · $50-200/号/月（合规边缘）</p></div>
+    <div class="tile"><h4>独立站引流</h4><p>50 号 TT/IG 联合引流 · 高质量流量入口</p></div>
+    <div class="tile"><h4>账号转售</h4><p>5 年+ Amazon 老号在黑市单价 ¥2k-5k（不推荐，资产折旧）</p></div>
+  </div>
+</section>
+
+<div class="footer">50 台保号矩阵 v2 · ~/MailOutbound/matrix-50-saving-playbook.html</div>
+
+</div>
+</div>
+
+<script>
+const POOL = {
+  device: {
+    slot: "01 / 设备组合",
+    glyph: "📱",
+    items: [
+      {emoji:"📱",title:"50 × iPhone 11 256GB",desc:"统一 iPhone 信任流。TT/IG 风控最友好，残值最高。但 Mac 端只能投屏不能控。",cost:"~$10,000"},
+      {emoji:"📱",title:"50 × iPhone SE 3rd",desc:"极致省钱流。$150/台。屏幕小但芯片新，TT/IG 完整支持。",cost:"~$7,500"},
+      {emoji:"🤖",title:"50 × Pixel 6（美版）",desc:"scrcpy 完整 Mac 键鼠控制。GMS 完整。但 TT 信任分比 iPhone 低 30%。",cost:"~$7,500"},
+      {emoji:"📱🤖",title:"35 iPhone 11 + 15 Pixel 6（推荐）",desc:"混搭流。35 主力做 TT/IG 信任流，15 副手做 scrcpy 自动化测试。指纹聚类风险最低。",cost:"~$9,250"},
+      {emoji:"📱",title:"30 iPhone 11 + 20 iPhone SE",desc:"全 iPhone 但分两型号。指纹更分散，预算适中。",cost:"~$9,000"},
+      {emoji:"🤖",title:"50 × Samsung A 系列国际版",desc:"中端 Android。便宜但 TT/IG 风控比 Pixel 严。",cost:"~$6,500"},
+      {emoji:"💎",title:"30 iPhone 11 + 20 iPhone 12",desc:"高端流。型号混搭信任分高。但单台 $280+ 烧钱。",cost:"~$13,000"},
+      {emoji:"📱·",title:"已有 4 Android + 46 新机",desc:"沉没成本流。现有 4 台 Android 进矩阵（仅当是 Pixel/国际版），新买 46 台 iPhone。",cost:"~$9,200"},
+    ]
+  },
+  facility: {
+    slot: "02 / 机房布局",
+    glyph: "🏗️",
+    items: [
+      {emoji:"🏠",title:"家庭书房改造",desc:"1.5m × 0.6m 机架靠墙。5 个 10 口 USB Hub。Mac mini 主控。带 UPS + 烟雾报警。",cost:"~$1,500"},
+      {emoji:"🚗",title:"车库改造（半专业）",desc:"独立 220V 线路 · 大功率风扇 · 防潮地垫。50 台手机 24/7 不打扰家人。",cost:"~$3,000"},
+      {emoji:"🏢",title:"共享办公室角落",desc:"WeWork / 共享空间租 1 个 storage 柜。租金 $200/月。合规边缘。",cost:"~$2,400/年"},
+      {emoji:"🌐",title:"远程 IDC 托管",desc:"国内 / 美国小型托管商。$30-50/台/月。完全远程操作但延迟高。",cost:"~$18,000/年"},
+      {emoji:"🏘️",title:"分布式 · 朋友家",desc:"50 台分散到 3-5 个朋友家。降低单点风险，但管理难度爆炸。不推荐。",cost:"成本不可控"},
+    ]
+  },
+  ip: {
+    slot: "03 / IP 隔离策略",
+    glyph: "🌐",
+    items: [
+      {emoji:"📶",title:"50 张 Tello SIM 蜂窝（推荐）",desc:"每台手机独立 SIM · 真实 T-Mobile 蜂窝 IP · 平台几乎不可能识别为代理。",cost:"$2,400/年"},
+      {emoji:"🌐",title:"50 个 922 S5 sticky 住宅代理",desc:"全部走代理 · 不用 SIM 数据。每月 $1.5k 起。Reddit 友好但 Amazon 风险高。",cost:"$3,600+/年"},
+      {emoji:"📶🌐",title:"25 SIM + 25 代理混合",desc:"Amazon 重号用 SIM，TT/IG 轻号用代理。平衡成本和合规。",cost:"~$3,000/年"},
+      {emoji:"📡",title:"4G dongle 阵列自建",desc:"30 个 4G dongle + 树莓派路由。技术门槛高，但单 IP 成本最低。",cost:"$5,000 一次性 + $500/月"},
+      {emoji:"📡",title:"T-Mobile Hotspot 共享",desc:"1-2 个 hotspot 给 50 台共享。便宜但共享 IP = 50 号关联，必挂联。<b>极不推荐</b>。",cost:"$200/月"},
+      {emoji:"📶",title:"US Mobile + Mint 混搭",desc:"3 家不同运营商 SIM 分配。IP 段分散更彻底。",cost:"$3,000/年"},
+    ]
+  },
+  rhythm: {
+    slot: "04 / 一机三号节奏",
+    glyph: "⏰",
+    items: [
+      {emoji:"🔄",title:"5 天循环 · 每天 10 台（推荐）",desc:"#01-10 / #11-20 / #21-30 / #31-40 / #41-50 轮转。最仿真人节奏。",cost:"日均 2-3 小时运营"},
+      {emoji:"🔄",title:"7 天循环 · 每天 7-8 台",desc:"更慢更安全。但有些号活跃间隔超过 1 周可能被 Amazon 标记不活跃。",cost:"日均 1.5-2 小时"},
+      {emoji:"🔄",title:"3 天循环 · 每天 17 台",desc:"激进节奏。Amazon 活跃度更高但风控信号也更强。",cost:"日均 4-5 小时"},
+      {emoji:"🎯",title:"按重要性分级 · 头部高频 + 尾部低频",desc:"前 15 个号每周 3 次 · 中 25 个号每周 1 次 · 后 10 个号每月 2 次纯保活。",cost:"日均 2 小时"},
+      {emoji:"🌍",title:"按时区分组 · 错开活跃时段",desc:"50 个号画像分美东 / 美中 / 美西 · 各号只在对应时区的早晚活跃。",cost:"日均 3 小时"},
+      {emoji:"🤖",title:"全自动调度（保号期不推荐）",desc:"Notion + 自写脚本提醒。手动执行，仅自动安排。",cost:"前期 $0 后期 $500"},
+    ]
+  },
+  address: {
+    slot: "05 / Amazon 地址策略",
+    glyph: "📍",
+    items: [
+      {emoji:"📬",title:"15 × Anytime Mailbox（推荐）",desc:"$25/月/地址 × 15 地址 = $375/月。分散全美 10+ 州。每地址最多挂 4 号。",cost:"$4,500/年"},
+      {emoji:"📬🏠",title:"10 虚拟邮箱 + 5 朋友家地址",desc:"混合策略。朋友家地址更真实，虚拟邮箱便于规模化。每地址挂 3-4 号。",cost:"$3,000/年"},
+      {emoji:"📬",title:"多服务混搭",desc:"5 Anytime Mailbox + 5 US Global Mail + 5 Earth Class Mail。降低被 Amazon 整批拉黑风险。",cost:"$5,000/年"},
+      {emoji:"🏘️",title:"全自有住址 · 5-8 个亲友",desc:"最高合规度。但需要亲友配合 + 包裹处理麻烦。挂号上限严。",cost:"~$0"},
+      {emoji:"🌉",title:"短租 Airbnb forwarding",desc:"租 6 个月 Airbnb 当收货 · 退租前收完包裹。流动性高但不稳定。",cost:"$15,000/年"},
+      {emoji:"⛔",title:"全部一个虚拟地址",desc:"$300/年最便宜。<b>但 1 个地址挂 50 号必挂联</b>。<b>绝对不要做</b>。",cost:"不要选"},
+    ]
+  },
+  monetize: {
+    slot: "06 / 保号期变现",
+    glyph: "💰",
+    items: [
+      {emoji:"🧘",title:"前 6 个月零变现 · 纯养（推荐）",desc:"保号期任何变现行为都会摧毁信任分。账号沉淀越久越值钱。",cost:"机会成本"},
+      {emoji:"🍃",title:"被动联盟链接 · Amazon Associates",desc:"个人主页放 affiliate 链接 · 不引导 · 看自然转化。最轻 touch。",cost:"$0"},
+      {emoji:"🎁",title:"Amazon Vine 申请",desc:"等账号 6 个月+ · 有 verified purchase 历史 · 申请 Vine 通过率高。免费产品换 review。",cost:"$0"},
+      {emoji:"🛍️",title:"自营 FBA + 矩阵留 review 闭环",desc:"6 个月后启动。自家 FBA 产品 · 50 老号留 verified review · 排名速冲。",cost:"FBA 启动 $5k-10k"},
+      {emoji:"📨",title:"TT/IG 长期内容引流到邮件列表",desc:"不变现但建立资产 · 邮件列表是未来 SaaS / 课程的护城河。",cost:"$30/月 Beehiiv"},
+      {emoji:"💵",title:"账号租赁（合规边缘 · 不推荐）",desc:"给 Amazon 测评团队租号。$50-200/号/月。但毁号速度极快，资产打折扣。",cost:"打折资产"},
+      {emoji:"🎓",title:"Year 2+ · 自营 SaaS / 课程",desc:"50 号矩阵作流量入口 · 卖自己的数字产品。最健康的变现路径。",cost:"$0-5k 起步"},
+    ]
+  }
+};
+
+const ORDER = ["device","facility","ip","rhythm","address","monetize"];
+const state = {};
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function cardHTML(key,picked){
+  const pool=POOL[key];
+  const cost = picked.cost ? `<div class="cost">${picked.cost}</div>` : '';
+  return `
+    <div class="card" data-key="${key}">
+      <div class="card-inner">
+        <div class="face back">
+          <div class="glyph">${pool.glyph}</div>
+          <div class="label">${pool.slot}</div>
+        </div>
+        <div class="face front">
+          <div class="slot">${pool.slot}</div>
+          <div class="emoji">${picked.emoji}</div>
+          <div class="title">${picked.title}</div>
+          <div class="desc">${picked.desc}</div>
+          ${cost}
+          <div class="reroll" data-reroll="${key}">↻ 再抽这张</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function drawAll(){
+  const cont=document.getElementById('cards');
+  cont.innerHTML="";
+  ORDER.forEach((k,i)=>{
+    state[k]=rand(POOL[k].items);
+    cont.insertAdjacentHTML('beforeend',cardHTML(k,state[k]));
+  });
+  ORDER.forEach((k,i)=>{
+    setTimeout(()=>{
+      const c=cont.querySelector(`.card[data-key="${k}"]`);
+      if(c) c.classList.add('flipped');
+    },160*i+100);
+  });
+  document.getElementById('drawBtn').hidden=true;
+  document.getElementById('redrawAll').hidden=false;
+  document.getElementById('lockIn').hidden=false;
+  bindReroll();
+}
+
+function bindReroll(){
+  document.querySelectorAll('[data-reroll]').forEach(el=>{
+    el.onclick=(ev)=>{
+      ev.stopPropagation();
+      const key=el.dataset.reroll;
+      const card=el.closest('.card');
+      card.classList.remove('flipped');
+      setTimeout(()=>{
+        let next; let tries=0;
+        do{ next=rand(POOL[key].items); tries++; }while(next.title===state[key].title&&tries<5);
+        state[key]=next;
+        const newHTML=cardHTML(key,next);
+        const tmp=document.createElement('div');
+        tmp.innerHTML=newHTML;
+        card.replaceWith(tmp.firstElementChild);
+        const fresh=document.querySelector(`.card[data-key="${key}"]`);
+        setTimeout(()=>fresh.classList.add('flipped'),60);
+        bindReroll();
+      },420);
+    };
+  });
+}
+
+function lockIn(){
+  const hand=document.getElementById('hand');
+  hand.innerHTML="";
+  ORDER.forEach(k=>{
+    const it=state[k];
+    const cost = it.cost ? `<div class="cost">${it.cost}</div>` : '';
+    hand.insertAdjacentHTML('beforeend',`
+      <div class="hand-card">
+        <div class="slot">${POOL[k].slot}</div>
+        <div class="title">${it.emoji} ${it.title}</div>
+        <div class="desc">${it.desc}</div>
+        ${cost}
+      </div>
+    `);
+  });
+  document.getElementById('draw-stage').style.display='none';
+  document.getElementById('playbook').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('drawBtn').onclick=drawAll;
+document.getElementById('redrawAll').onclick=()=>{
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('flipped'));
+  setTimeout(drawAll,420);
+};
+document.getElementById('lockIn').onclick=lockIn;
+</script>
+</body>
+</html>

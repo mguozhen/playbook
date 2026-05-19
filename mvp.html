@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>三平台矩阵 MVP · Playbook</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{
+  --bg:#0b0814;
+  --bg-2:#15102a;
+  --surface:#1c1735;
+  --surface-2:#26204a;
+  --line:#2f2854;
+  --purple:#7c3aed;
+  --purple-2:#a78bfa;
+  --gold:#f59e0b;
+  --gold-2:#fde68a;
+  --green:#34d399;
+  --red:#f87171;
+  --text:#e5e7eb;
+  --text-dim:#9ca3af;
+  --text-dimer:#6b7280;
+  --card-bg:linear-gradient(155deg,#1c1735 0%,#241c46 100%);
+  --card-glow:0 0 0 1px rgba(167,139,250,.25),0 12px 40px -8px rgba(124,58,237,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Noto Sans SC','Hiragino Sans',sans-serif;line-height:1.65;font-size:15px}
+body{background:
+  radial-gradient(1200px 600px at 80% -10%,rgba(124,58,237,.18),transparent 60%),
+  radial-gradient(900px 500px at 10% 110%,rgba(245,158,11,.10),transparent 60%),
+  var(--bg);min-height:100vh}
+.container{max-width:1120px;margin:0 auto;padding:48px 28px 96px}
+.headline{font-size:32px;font-weight:700;margin:0 0 8px;letter-spacing:-.5px;background:linear-gradient(120deg,#fff 0%,#a78bfa 70%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subline{color:var(--text-dim);margin:0 0 36px}
+
+/* Draw stage */
+#draw-stage{min-height:78vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8vh}
+#draw-stage .intro{text-align:center;max-width:680px}
+#draw-stage h1{font-size:42px;font-weight:800;letter-spacing:-1px;margin:0 0 14px;background:linear-gradient(120deg,#fff,#a78bfa 60%,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#draw-stage .intro p{color:var(--text-dim);font-size:16px;margin:0 0 6px}
+#draw-stage .intro .meta{color:var(--text-dimer);font-size:13px;margin-top:6px}
+
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;margin:48px 0 24px;width:100%;max-width:1120px}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.cards{grid-template-columns:1fr}}
+
+.card{position:relative;perspective:1200px;height:340px;cursor:pointer}
+.card-inner{position:relative;width:100%;height:100%;transition:transform .8s cubic-bezier(.22,1,.36,1);transform-style:preserve-3d}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.face.back{background:
+  radial-gradient(120% 80% at 50% 0%,rgba(167,139,250,.35),transparent 60%),
+  linear-gradient(160deg,#1c1735,#0f0a22);
+  border:1px solid rgba(167,139,250,.25);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--card-glow)}
+.face.back::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(167,139,250,.25);border-radius:14px}
+.face.back .glyph{font-size:64px;background:linear-gradient(120deg,#a78bfa,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;filter:drop-shadow(0 4px 16px rgba(167,139,250,.4))}
+.face.back .label{position:absolute;bottom:18px;color:var(--text-dimer);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.face.front{background:var(--card-bg);border:1px solid rgba(167,139,250,.25);transform:rotateY(180deg);padding:20px;box-shadow:var(--card-glow)}
+.face.front .slot{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600}
+.face.front .emoji{font-size:42px;margin:14px 0 6px;line-height:1}
+.face.front .title{font-size:18px;font-weight:700;margin:0 0 8px;letter-spacing:-.3px}
+.face.front .desc{font-size:12.5px;color:var(--text-dim);line-height:1.5;flex:1}
+.face.front .reroll{margin-top:12px;text-align:center;font-size:11px;color:var(--purple-2);letter-spacing:.5px;padding:8px 0;border-top:1px dashed rgba(167,139,250,.2);transition:color .2s}
+.face.front .reroll:hover{color:var(--gold-2)}
+
+.actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+button.btn{appearance:none;border:1px solid rgba(167,139,250,.4);background:linear-gradient(120deg,#7c3aed,#5b21b6);color:#fff;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px -6px rgba(124,58,237,.6)}
+button.btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px -6px rgba(124,58,237,.8)}
+button.btn.ghost{background:transparent;color:var(--purple-2);box-shadow:none}
+button.btn.ghost:hover{background:rgba(124,58,237,.1)}
+button.btn.gold{background:linear-gradient(120deg,#f59e0b,#d97706);border-color:rgba(245,158,11,.5);box-shadow:0 8px 24px -6px rgba(245,158,11,.5)}
+button.btn.gold:hover{box-shadow:0 12px 28px -6px rgba(245,158,11,.7)}
+
+/* Playbook */
+#playbook{display:none}
+#playbook.show{display:block;animation:fade .6s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.hand{display:flex;gap:12px;margin:16px 0 36px;flex-wrap:wrap}
+.hand-card{flex:1;min-width:170px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.hand-card .slot{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px}
+.hand-card .title{font-size:14px;font-weight:600}
+.hand-card .desc{font-size:12px;color:var(--text-dim);margin-top:4px}
+
+section.block{background:linear-gradient(180deg,var(--surface),rgba(28,23,53,.4));border:1px solid var(--line);border-radius:16px;padding:28px;margin:18px 0}
+section.block h2{margin:0 0 14px;font-size:22px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+section.block h2 .ic{display:inline-flex;width:32px;height:32px;border-radius:9px;background:rgba(167,139,250,.15);align-items:center;justify-content:center;font-size:16px}
+section.block h3{font-size:16px;font-weight:600;color:var(--purple-2);margin:20px 0 10px}
+section.block p,section.block li{color:var(--text);font-size:14.5px}
+section.block ul{padding-left:20px;margin:8px 0}
+section.block li{margin:6px 0}
+
+table.budget{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px}
+table.budget th,table.budget td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+table.budget th{color:var(--gold);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase}
+table.budget td.num{text-align:right;color:var(--gold-2);font-variant-numeric:tabular-nums;font-weight:600}
+table.budget tr.total td{border-top:2px solid var(--gold);font-weight:700;font-size:14.5px}
+table.budget tr.subtotal td{color:var(--text-dim);font-style:italic}
+
+.arch{background:#0a0716;border:1px solid var(--line);border-radius:12px;padding:18px;margin:10px 0;font-family:ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;font-size:12.5px;color:var(--purple-2);overflow:auto;line-height:1.7;white-space:pre}
+
+.timeline{display:grid;grid-template-columns:120px 1fr;gap:14px 22px;margin-top:10px}
+.timeline .when{color:var(--gold);font-weight:600;font-size:13px;letter-spacing:.5px;padding-top:2px}
+.timeline .what{font-size:14px}
+.timeline .what ul{padding-left:18px;margin:4px 0}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.tile{background:rgba(15,10,34,.55);border:1px solid var(--line);border-radius:12px;padding:16px}
+.tile h4{margin:0 0 6px;font-size:14px;color:var(--purple-2);font-weight:600}
+.tile p{margin:0;font-size:13px;color:var(--text-dim)}
+
+.kpi-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.kpi{background:rgba(15,10,34,.55);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim)}
+.kpi .val{font-size:18px;font-weight:700;color:var(--gold);margin-top:2px}
+.kpi .note{font-size:12px;color:var(--text-dim);margin-top:4px}
+
+.risk{display:grid;grid-template-columns:1fr 80px 1.2fr;gap:10px 14px;font-size:13.5px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.risk:last-child{border:0}
+.risk .level{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:.5px;text-align:center;height:fit-content}
+.risk .h{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.risk .m{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.risk .l{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+
+.dont{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.dont .it{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:12px;font-size:13px}
+.dont .it::before{content:"✗ ";color:var(--red);font-weight:700}
+
+.footer{margin-top:48px;text-align:center;color:var(--text-dimer);font-size:12px}
+
+.toolbar{position:sticky;top:12px;z-index:10;display:flex;gap:8px;justify-content:flex-end;margin-bottom:-20px}
+.toolbar button{font-size:12px;padding:8px 12px;background:rgba(28,23,53,.85);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--text-dim);border-radius:8px;cursor:pointer}
+.toolbar button:hover{color:var(--gold-2);border-color:var(--gold)}
+
+.print-only{display:none}
+@media print{
+  body{background:#fff;color:#111}
+  #draw-stage,.toolbar,.face.back{display:none!important}
+  #playbook{display:block!important}
+  section.block{break-inside:avoid;page-break-inside:avoid}
+  .face.front{box-shadow:none;border:1px solid #ddd}
+}
+</style>
+</head>
+<body>
+
+<div id="draw-stage">
+  <div class="intro">
+    <h1>三平台矩阵 MVP · 出装抽卡</h1>
+    <p>$4k 预算 / 90 天 / TT + IG + Reddit / 硅谷本地身份</p>
+    <p class="meta">第一次进来，先抽 5 张牌组成开局。点单张卡上"再抽这张"重抽单卡。锁定后切到完整 Playbook。</p>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="actions">
+    <button class="btn" id="drawBtn">抽 5 张牌</button>
+    <button class="btn ghost" id="redrawAll" hidden>全部重抽</button>
+    <button class="btn gold" id="lockIn" hidden>锁定出装 → 进入 Playbook</button>
+  </div>
+</div>
+
+<div class="container">
+<div id="playbook">
+
+<div class="toolbar">
+  <button onclick="window.print()">导出 PDF</button>
+  <button onclick="location.reload()">重新抽卡</button>
+</div>
+
+<h1 class="headline">三平台矩阵 MVP · Playbook</h1>
+<p class="subline">$4k 预算 / 90 天 / TT + IG + Reddit · 硅谷本地身份 · 多变现摸索阶段</p>
+
+<section class="block">
+  <h2><span class="ic">🎴</span> 你的出装</h2>
+  <div class="hand" id="hand"></div>
+  <p style="color:var(--text-dim);font-size:13px;margin:6px 0 0">这套出装是 MVP 验证用，跑完 30 天看哪条线起量再加倍下注。下面 Playbook 里所有 SOP 都是基于这套出装写的。</p>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🏗️</span> 架构</h2>
+  <p>两套并行基础设施 + 一套共享后台。TT/IG 必须真机；Reddit 用浏览器指纹隔离即可。</p>
+  <div class="arch">┌─────────────────────────────────────────────────┐
+│ TT/IG 真机矩阵 (4 台 iPhone)                    │
+│   scrcpy 投屏 → Mac 主控 → 半手动 + AI 内容    │
+│   每台 1 张 Tello SIM (蜂窝数据出口 = 干净 IP)  │
+└─────────────────────────────────────────────────┘
+                       ↓
+            ┌──────────────────────┐
+            │  共享后台 / 法律实体  │
+            │  - Wyoming LLC + EIN │
+            │  - Mercury 商业账户   │
+            │  - Claude API (内容)  │
+            │  - Pika/Runway (视频) │
+            │  - Notion 任务追踪    │
+            └──────────────────────┘
+                       ↑
+┌─────────────────────────────────────────────────┐
+│ Reddit 浏览器矩阵 (10 账号)                     │
+│   AdsPower 多账号浏览器 (指纹隔离)              │
+│   922 S5 住宅代理 (10 个 sticky IP)             │
+│   Playwright 监控 + 人工发帖 + AI 写 comment    │
+└─────────────────────────────────────────────────┘</div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">💰</span> 预算明细</h2>
+  <table class="budget">
+    <thead><tr><th>项</th><th>说明</th><th class="num">USD</th></tr></thead>
+    <tbody>
+      <tr><td>4 台二手 iPhone 11 256GB</td><td>Swappa A 级 · 全 Unlocked</td><td class="num">$800</td></tr>
+      <tr><td>USB Hub 10 口 + 充电线</td><td>Anker / Sabrent</td><td class="num">$80</td></tr>
+      <tr><td>4 × Tello SIM（3 个月预付）</td><td>$9/月 · 2GB 数据 · 1 卡 1 号</td><td class="num">$108</td></tr>
+      <tr><td>AdsPower Pro（3 个月）</td><td>10 账号档</td><td class="num">$162</td></tr>
+      <tr><td>922 S5 住宅代理</td><td>10 个 sticky IP · 3 个月</td><td class="num">$300</td></tr>
+      <tr><td>Wyoming LLC + 注册代理</td><td>Northwest · 首年</td><td class="num">$250</td></tr>
+      <tr><td>EIN + Mercury</td><td>IRS 免费 · Mercury 线上免费</td><td class="num">$0</td></tr>
+      <tr><td>Claude API（3 个月）</td><td>文案 / 评论 draft · 估月 $100</td><td class="num">$300</td></tr>
+      <tr><td>Pika Labs / Runway</td><td>$30/月 标准档</td><td class="num">$90</td></tr>
+      <tr><td>UGC 素材 + Envato</td><td>30 天</td><td class="num">$99</td></tr>
+      <tr><td>域名 + Mailchimp 起步档</td><td>用于引流变现验证</td><td class="num">$50</td></tr>
+      <tr class="subtotal"><td colspan="2">必选合计</td><td class="num">$2,239</td></tr>
+      <tr><td>Buffer</td><td>设备坏 / 补号 / 意外</td><td class="num">~$1,500</td></tr>
+      <tr class="total"><td colspan="2">首期总投入</td><td class="num">$3,739</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="block">
+  <h2><span class="ic">📅</span> 30 天 SOP</h2>
+  <div class="timeline">
+    <div class="when">Week 1 · Day 1-2</div>
+    <div class="what">
+      <ul>
+        <li>注册 Wyoming LLC（Northwest Registered Agent，线上 30 分钟）</li>
+        <li>申请 EIN（IRS 网站，10 分钟，当天下来）</li>
+        <li>开 Mercury 商业账户（线上 15 分钟，1-3 天审核）</li>
+        <li>买 AdsPower Pro 10 账号 + 922 S5 10 个美国 sticky IP（指定 3-5 州分散）</li>
+      </ul>
+    </div>
+
+    <div class="when">Week 1 · Day 3-5</div>
+    <div class="what">
+      <ul>
+        <li>下单 4 台二手 iPhone 11 256GB（Swappa A 级，~$200/台，全部 Unlocked）</li>
+        <li>下单 4 张 Tello SIM 卡 + 3 个月预付套餐</li>
+        <li>下单 USB Hub + 充电线</li>
+      </ul>
+    </div>
+
+    <div class="when">Week 1 · Day 6-7</div>
+    <div class="what">
+      <ul>
+        <li>4 台 iPhone 激活，每台用<b>不同的新 Apple ID</b>（Tello 收码）</li>
+        <li>Play Store 美区装 TikTok + Instagram，不用 GSpace</li>
+        <li>brew install scrcpy，4 台手机连 Mac 测投屏</li>
+        <li>国行荣耀作为自用机留着，<b>不进矩阵</b></li>
+      </ul>
+    </div>
+
+    <div class="when">Week 2 · 静默期</div>
+    <div class="what">
+      <p><b>TT/IG（4 个号）</b>：定 2 个垂直方向，每方向 1 TT + 1 IG，互不关注。<b>完全不发内容</b>，每号每天 30 分钟纯刷 For You，完播率 > 80%。</p>
+      <p><b>Reddit（10 个号）</b>：AdsPower 10 个独立 profile（绑 10 个独立 IP），用<b>不同 Gmail</b>注册。前 7 天只浏览 + upvote，不评论不发帖。选 5-10 个目标 sub。</p>
+    </div>
+
+    <div class="when">Week 3 · 内容初探</div>
+    <div class="what">
+      <p><b>TT/IG</b>：每号 3-5 条短视频（AI + 手剪），用 scrcpy 切设备<b>手动发</b>，错时发。</p>
+      <p><b>Reddit</b>：每号每天 2-5 条 comment（AI 出 draft + 人工 review）。优先 hot/rising 帖子。<b>不发原创 post</b>，纯靠 comment 攒 karma。目标：每号 karma ≥ 30。</p>
+    </div>
+
+    <div class="when">Week 4 · 复盘</div>
+    <div class="what">
+      <p>收集：每号粉丝、播放量、互动率、karma、被删 comment、收到 DM、链接点击、订单。</p>
+      <p>决策：1 个 TT 号 > 1k 粉 → 加大 TT。3 个 Reddit 号 karma > 100 + 1 个 sub 真实互动 → 加大 Reddit。全部扑街 → 换方向再 30 天或退出。</p>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🛠️</span> 工具栈</h2>
+  <h3>TT/IG 真机栈</h3>
+  <div class="grid2">
+    <div class="tile"><h4>scrcpy</h4><p>Mac 投屏控制 4 台手机。开源免费。<code>brew install scrcpy</code></p></div>
+    <div class="tile"><h4>Claude API</h4><p>文案 / 标题 / hashtag / 评论 draft 生成</p></div>
+    <div class="tile"><h4>Pika Labs / Runway</h4><p>短视频 AI 混剪。$30/月</p></div>
+    <div class="tile"><h4>CapCut</h4><p>手动剪辑兜底，免费</p></div>
+    <div class="tile"><h4>Tello / Mint Mobile</h4><p>美国真实 SIM 卡，每号一卡</p></div>
+    <div class="tile"><h4>不用</h4><p>tidevice / WDA / Airtest / Magisk —— MVP 阶段不要</p></div>
+  </div>
+
+  <h3>Reddit 浏览器栈</h3>
+  <div class="grid2">
+    <div class="tile"><h4>AdsPower Pro</h4><p>多账号浏览器 + 指纹隔离，$54/月 10 账号</p></div>
+    <div class="tile"><h4>922 S5</h4><p>美国住宅代理 sticky IP，每号独立</p></div>
+    <div class="tile"><h4>Playwright</h4><p>只用来监控目标 sub 热度。<b>不用来发帖</b></p></div>
+    <div class="tile"><h4>Notion</h4><p>账号 / karma / 发帖追踪</p></div>
+  </div>
+
+  <h3>共享后台</h3>
+  <div class="grid2">
+    <div class="tile"><h4>Wyoming LLC</h4><p>Northwest Registered Agent · $250/首年</p></div>
+    <div class="tile"><h4>EIN + Mercury</h4><p>税号免费 + 商业银行线上开</p></div>
+    <div class="tile"><h4>1Password</h4><p>统一存所有账号凭证</p></div>
+    <div class="tile"><h4>Notion / Linear</h4><p>任务追踪 + KPI 看板</p></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🎯</span> 验证指标</h2>
+  <h3>Day 30 检查点</h3>
+  <div class="kpi-list">
+    <div class="kpi"><div class="label">基础设施</div><div class="val">100%</div><div class="note">LLC + EIN + Mercury 到位</div></div>
+    <div class="kpi"><div class="label">账号存活率</div><div class="val">> 75%</div><div class="note">4 台 iPhone + 10 Reddit 号</div></div>
+    <div class="kpi"><div class="label">TT 头部粉丝</div><div class="val">≥ 500</div><div class="note">至少 1 个号</div></div>
+    <div class="kpi"><div class="label">IG 头部粉丝</div><div class="val">≥ 300</div><div class="note">至少 1 个号</div></div>
+    <div class="kpi"><div class="label">Reddit Karma</div><div class="val">≥ 100</div><div class="note">至少 3 个号</div></div>
+    <div class="kpi"><div class="label">变现信号</div><div class="val">≥ 1 条</div><div class="note">DM / 订阅 / 点击 / 订单</div></div>
+  </div>
+
+  <h3>Day 60 / Day 90</h3>
+  <ul>
+    <li><b>Day 60</b>：三平台中有 1 个明显跑赢 → 把资源向那个平台倾斜。TT 头部 ≥ 5k，IG 头部 ≥ 2k，Reddit 头部 karma ≥ 1k。</li>
+    <li><b>Day 90</b>：跑通 → 制 $10k-$20k Phase 2 计划。没跑通 → iPhone 二手回血（残值 70%+），写复盘文档。</li>
+  </ul>
+</section>
+
+<section class="block">
+  <h2><span class="ic">⚠️</span> 风险与对冲</h2>
+  <div style="margin-top:10px">
+    <div class="risk"><div>TT/IG 4 台中 1-2 个新号 7 天内封</div><div class="level m">中高</div><div>Buffer 预算补 1-2 台手机 + Apple ID 重注</div></div>
+    <div class="risk"><div>Reddit 10 个号 30 天内 3-5 个被 ban</div><div class="level h">高</div><div>准备 10 个备用 Gmail，封 1 补 1</div></div>
+    <div class="risk"><div>LLC 审核 > 7 天</div><div class="level m">中</div><div>不阻塞 TT/IG 启动；TT Shop 入驻推后</div></div>
+    <div class="risk"><div>Mercury 拒批</div><div class="level l">低</div><div>兜底 Brex 或 Wise Business</div></div>
+    <div class="risk"><div>AdsPower 突然涨价 / 被墙</div><div class="level l">低</div><div>Plan B：Dolphin Anty 免费档</div></div>
+    <div class="risk"><div>内容方向选错 30 天 0 变现</div><div class="level m">中</div><div>Buffer 够再试 1 个方向</div></div>
+    <div class="risk"><div>TT/IG 季度封号潮</div><div class="level l">低</div><div>不重金养单号，分散风险</div></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🚫</span> 不做的事</h2>
+  <div class="dont">
+    <div class="it">不刷国行荣耀（bootloader 锁死，性价比极低）</div>
+    <div class="it">不上自动化群控（MVP 阶段半手动反而最安全）</div>
+    <div class="it">不买云手机（IG 封号率高 + IP 关联）</div>
+    <div class="it">不做 Reddit 自动发帖（必封）</div>
+    <div class="it">不用接码平台号注册（必封）</div>
+    <div class="it">不混用账号身份（TT/IG 4 号 ≠ Reddit 10 号）</div>
+    <div class="it">不做 TT Shop 入驻，直到 TT 头部 ≥ 5k</div>
+  </div>
+</section>
+
+<section class="block">
+  <h2><span class="ic">🚀</span> Phase 2 预案（跑通才做）</h2>
+  <ul>
+    <li>加 15-20 台 iPhone 到 TT/IG（向 25 台规模扩）</li>
+    <li>加到 30-50 Reddit 账号</li>
+    <li>上 tidevice + WebDriverAgent 半自动化（<b>不开 iOS 开发者模式</b>，用 $99 Apple Dev 账号签名 WDA）</li>
+    <li>雇 1 个兼职运营（$1500/月）</li>
+    <li>视情况注册第二个 LLC 隔离合规风险</li>
+    <li>预算上限 $15k-$20k</li>
+  </ul>
+</section>
+
+<div class="footer">三平台矩阵 MVP · v1 · ~/.claude/plans/delegated-doodling-catmull.md</div>
+
+</div>
+</div>
+
+<script>
+const POOL = {
+  vertical: {
+    slot: "01 / 垂直方向",
+    glyph: "🎯",
+    items: [
+      {emoji:"🤖",title:"AI 工具评测",desc:"OpenAI / Anthropic / Cursor 新品评测 + 工作流分享。硅谷本地视角天然加分。"},
+      {emoji:"💼",title:"硅谷打工人日常",desc:"互联网/科技公司文化、面试经验、薪酬透明、湾区生活。粉丝粘性高。"},
+      {emoji:"🛠️",title:"独立开发者 / Indie Hacker",desc:"做产品、跑 MRR、build in public。Reddit 流量最匹配。"},
+      {emoji:"🏃",title:"数字游民 + 远程工作",desc:"远程工具、效率方法、跨时区团队。IG/TT 视觉感强。"},
+      {emoji:"📈",title:"美股 + 加密日记",desc:"硅谷视角看科技股 + 加密。Reddit r/wsb 流量天花板高。"},
+      {emoji:"🍜",title:"硅谷亚洲美食 + 生活",desc:"湾区餐厅、文化、生活方式。TT/IG 转化最快赛道。"},
+      {emoji:"🎮",title:"科技玩具 + 智能家居开箱",desc:"新硬件第一时间评测。亚马逊联盟变现最直接。"},
+      {emoji:"📚",title:"创业书评 + 商业分析",desc:"读 a16z / Stratechery / Acquired，做深度商业内容。SEO 价值高。"},
+    ]
+  },
+  device: {
+    slot: "02 / 设备组合",
+    glyph: "📱",
+    items: [
+      {emoji:"📱📱📱📱",title:"4 × iPhone 11 256GB",desc:"经典稳健流。Swappa A 级 ~$200/台 × 4 = $800。最适合 MVP。"},
+      {emoji:"📱📱🤖🤖",title:"2 iPhone 11 + 2 Pixel 6",desc:"双系统对照流。便于观察 TT/IG 风控差异。Pixel ~$150/台。"},
+      {emoji:"📱²×2",title:"4 × iPhone SE 3rd",desc:"极致省钱流。$150/台 × 4 = $600，省下来加内容预算。屏幕小，剪辑稍累。"},
+      {emoji:"📱📱📱·",title:"3 iPhone 11 + 国行荣耀",desc:"用现有手机流。荣耀只做测试机不进矩阵主力。省 $200。"},
+      {emoji:"💎💎📱📱",title:"2 iPhone 12 + 2 iPhone 11",desc:"高端流。12 系列 ~$280/台。预算紧，但设备指纹更高级。"},
+    ]
+  },
+  persona: {
+    slot: "03 / 内容人设",
+    glyph: "🎭",
+    items: [
+      {emoji:"🧠",title:"理性技术派",desc:"数据 + 分析 + 第一性原理。慢热但粘性极高，适合 Reddit 长期养。"},
+      {emoji:"😎",title:"第一人称体验派",desc:"vlog 视角、生活化、镜头感。TT/IG 起量最快人设。"},
+      {emoji:"🎭",title:"反差人设",desc:"高知 + 段子手、严肃话题轻松讲。算法偏爱差异化。"},
+      {emoji:"🤝",title:"真诚分享派",desc:"不端着、不卖人设、像朋友聊天。IG 私信转化高。"},
+      {emoji:"🔥",title:"锐评派",desc:"敢说敢评、立场鲜明、不怕得罪人。流量爆但争议大。"},
+      {emoji:"📖",title:"教程派",desc:"手把手 how-to。SEO/搜索流量友好，复购率高。"},
+    ]
+  },
+  battlefield: {
+    slot: "04 / 首发战场",
+    glyph: "🌐",
+    items: [
+      {emoji:"🛠️",title:"独立开发系",desc:"r/SideProject · r/Entrepreneur · r/SaaS · r/IndieHackers · TT #buildinpublic"},
+      {emoji:"🤖",title:"AI 系",desc:"r/ChatGPT · r/LocalLLaMA · r/Singularity · r/OpenAI · TT #AItools"},
+      {emoji:"💼",title:"科技职场系",desc:"r/cscareerquestions · r/ExperiencedDevs · r/SiliconValley · TT #techlife"},
+      {emoji:"🌍",title:"远程游民系",desc:"r/digitalnomad · r/remotework · r/freelance · IG #digitalnomadlife"},
+      {emoji:"🍜",title:"生活方式系",desc:"r/EatCheapAndHealthy · r/SanFrancisco · r/foodhacks · IG/TT #bayareaeats"},
+      {emoji:"📈",title:"投资系",desc:"r/wallstreetbets · r/CryptoCurrency · r/Bogleheads · TT #fintok"},
+      {emoji:"📚",title:"商业分析系",desc:"r/startups · r/business · r/marketing · TT #businessbreakdown"},
+      {emoji:"🎮",title:"硬件极客系",desc:"r/gadgets · r/HomeAutomation · r/buildapc · TT/IG #unboxing"},
+    ]
+  },
+  monetize: {
+    slot: "05 / 30 天变现尝试",
+    glyph: "💰",
+    items: [
+      {emoji:"🔗",title:"联盟营销",desc:"Amazon Associates + Skimlinks + Impact。最快开始，单击就能验证转化率。"},
+      {emoji:"📨",title:"邮件列表",desc:"Substack / Beehiiv 起一个 newsletter，TT/IG/Reddit 全引到这一个池子。"},
+      {emoji:"🛒",title:"自建独立站",desc:"Shopify $29/月。AI 工具卖货 / 卖印刷品 / 卖数字模板。要 LLC + Stripe。"},
+      {emoji:"🎓",title:"数字产品",desc:"Gumroad 卖 prompt 包 / Notion 模板 / 课程。零库存，最适合 Indie 路线。"},
+      {emoji:"🤝",title:"UGC 接品牌",desc:"Aspire / Tribe Dynamics 平台挂创作者身份。被动等品牌邀约。粉丝 ≥ 1k 起。"},
+      {emoji:"☕",title:"Patreon / Ko-fi",desc:"小众但稳定。适合内容深度高的赛道（书评 / 技术分析）。"},
+      {emoji:"📞",title:"咨询服务",desc:"Cal.com 挂时段。$50-200/小时。单笔大但靠 LinkedIn / Twitter 漏斗。"},
+    ]
+  }
+};
+
+const ORDER = ["vertical","device","persona","battlefield","monetize"];
+const state = {};
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function cardHTML(key,picked){
+  const pool=POOL[key];
+  return `
+    <div class="card" data-key="${key}">
+      <div class="card-inner">
+        <div class="face back">
+          <div class="glyph">${pool.glyph}</div>
+          <div class="label">${pool.slot}</div>
+        </div>
+        <div class="face front">
+          <div class="slot">${pool.slot}</div>
+          <div class="emoji">${picked.emoji}</div>
+          <div class="title">${picked.title}</div>
+          <div class="desc">${picked.desc}</div>
+          <div class="reroll" data-reroll="${key}">↻ 再抽这张</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function drawAll(){
+  const cont=document.getElementById('cards');
+  cont.innerHTML="";
+  ORDER.forEach((k,i)=>{
+    state[k]=rand(POOL[k].items);
+    cont.insertAdjacentHTML('beforeend',cardHTML(k,state[k]));
+  });
+  ORDER.forEach((k,i)=>{
+    setTimeout(()=>{
+      const c=cont.querySelector(`.card[data-key="${k}"]`);
+      if(c) c.classList.add('flipped');
+    },180*i+100);
+  });
+  document.getElementById('drawBtn').hidden=true;
+  document.getElementById('redrawAll').hidden=false;
+  document.getElementById('lockIn').hidden=false;
+  bindReroll();
+}
+
+function bindReroll(){
+  document.querySelectorAll('[data-reroll]').forEach(el=>{
+    el.onclick=(ev)=>{
+      ev.stopPropagation();
+      const key=el.dataset.reroll;
+      const card=el.closest('.card');
+      card.classList.remove('flipped');
+      setTimeout(()=>{
+        let next; let tries=0;
+        do{ next=rand(POOL[key].items); tries++; }while(next.title===state[key].title&&tries<5);
+        state[key]=next;
+        const newHTML=cardHTML(key,next);
+        const tmp=document.createElement('div');
+        tmp.innerHTML=newHTML;
+        card.replaceWith(tmp.firstElementChild);
+        const fresh=document.querySelector(`.card[data-key="${key}"]`);
+        setTimeout(()=>fresh.classList.add('flipped'),60);
+        bindReroll();
+      },420);
+    };
+  });
+}
+
+function lockIn(){
+  const hand=document.getElementById('hand');
+  hand.innerHTML="";
+  ORDER.forEach(k=>{
+    const it=state[k];
+    hand.insertAdjacentHTML('beforeend',`
+      <div class="hand-card">
+        <div class="slot">${POOL[k].slot}</div>
+        <div class="title">${it.emoji} ${it.title}</div>
+        <div class="desc">${it.desc}</div>
+      </div>
+    `);
+  });
+  document.getElementById('draw-stage').style.display='none';
+  document.getElementById('playbook').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('drawBtn').onclick=drawAll;
+document.getElementById('redrawAll').onclick=()=>{
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('flipped'));
+  setTimeout(drawAll,420);
+};
+document.getElementById('lockIn').onclick=lockIn;
+</script>
+</body>
+</html>
